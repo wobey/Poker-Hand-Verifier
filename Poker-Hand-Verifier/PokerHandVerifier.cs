@@ -73,6 +73,7 @@ namespace PokerHandVerifier
         static void Main()
         {
             Initialize_Game();
+            char charInput;
 
             Console.WriteLine("-----------------------------------");
             Console.WriteLine("Welcome to the Poker Hand Verifier!");
@@ -81,38 +82,11 @@ namespace PokerHandVerifier
 
             while (IsPlay)
             {
-                char charInput;
+                Display_Start_Menu();
+                ConsoleKeyInfo decision = Console.ReadKey();
 
-                // initial user decision
-                if (!IsManual)
-                {
-                    Display_Start_Menu();
-                    ConsoleKeyInfo decision = Console.ReadKey();
-
-                    charInput = Validate_Input_Menu(decision, "Start");
-                    Input_Decision(charInput);
-                }
-                else
-                {
-                    charInput = 'M';
-                    Input_Decision(charInput);
-                }
-
-                // ******** End Menu wasn't necessary **********
-                //// play again?
-                //if (IsPlay)
-                //{
-                //    // allow user to repeatedly input manual values
-                //    if (!IsManual)
-                //    {
-                //        Display_Start_Menu();
-                //        decision = Console.ReadKey();
-                //        //charInput = Validate_Input_Menu(decision, "End");
-                //        charInput = Validate_Input_Menu(decision, "Start");
-                //    }
-                    
-                //    Input_Decision(charInput);
-                //}
+                charInput = Validate_Input_Menu(decision, "Start");
+                Input_Decision(charInput);
             }
         }
 
@@ -1002,7 +976,9 @@ namespace PokerHandVerifier
                 }
             }
 
-            // ********** determine winner **********
+            // ******************************************
+            // ***********Determine Winner **************
+            // ******************************************
             Player winningPlayer = new Player();
             List<Player> players = new List<Player>();
             List<Card> tempCard1 = new List<Card>();
@@ -1013,7 +989,6 @@ namespace PokerHandVerifier
 
             foreach (var player in Players)
                 players.Add(player.Value);
-
             
             // iterate through each player
             for (int i = 0; i < NumberOfPlayers; ++i)
