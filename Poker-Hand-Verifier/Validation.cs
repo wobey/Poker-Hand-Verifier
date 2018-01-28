@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 class Validation : Dealer
 {
+    public static char[] MenuOptionsStart = { 'R', 'r', 'M', 'm', 'Q', 'q' };
+    public static char[] MenuOptionsEnd = { 'P', 'p', 'Q', 'q' };
+
     // validate user input for menus
     public static char Validate_Input_Menu(ConsoleKeyInfo key, string menuType)
     {
@@ -61,7 +61,7 @@ class Validation : Dealer
                 Deck.Card checkCard = new Deck.Card(hands[i][j], hands[i][++j]);
                 //checkCard.value = hands[i][j];
                 //checkCard.suit = hands[i][++j];
-                if (!Decks.FullDeck.Contains(checkCard))
+                if (!CardDeck.FullDeck.Contains(checkCard))
                 {
                     // clear each player's hand (in-case user changes previous players' cards)
                     foreach (var _player in Players)

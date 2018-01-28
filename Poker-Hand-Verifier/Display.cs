@@ -1,11 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 public class Display : Dealer
 {
+    // display title
+    public static void Display_Title()
+    {
+        Console.WriteLine("-----------------------------------");
+        Console.WriteLine("Welcome to the Poker Hand Verifier!");
+        Console.WriteLine("-----------------------------------");
+        Console.WriteLine("This program simulates two poker hands and verifies winner.");
+    }
+
     // display the initial menu
     public static void Display_Start_Menu()
     {

@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 public class Deck : Dealer
 {
+    public static Dictionary<char, int> Values;
+    public static List<char> Values_List;
+    public static Dictionary<char, int> Suits;
+    public static Dictionary<string, int> HandStrengths;
     public List<Card> FullDeck;
 
     public Deck()
