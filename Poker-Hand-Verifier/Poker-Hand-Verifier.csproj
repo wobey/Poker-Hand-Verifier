@@ -41,10 +41,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Dealer.cs" />
     <Compile Include="Deck.cs" />
     <Compile Include="Display.cs" />
     <Compile Include="Player.cs" />
-    <Compile Include="PokerHandVerifier.cs" />
+    <Compile Include="PokerGame.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Validation.cs" />
   </ItemGroup>

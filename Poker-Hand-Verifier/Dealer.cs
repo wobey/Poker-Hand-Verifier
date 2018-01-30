@@ -1,73 +1,67 @@
 ﻿// *****************************************************************
-// Title: PokerHandVerifier.cs
+// Title: Dealer.cs
 // Author: John Fitzgerald
-// Date: 3-23-17
-// Description: Poker-Hand-Verifier displays the winning hand 
-// between two 5-card poker hands. The program starts by prompting 
-// the user for a menu option: random hands, manual input of hands,
-// or quit program. After the user determines how they want to
-// execute the input of hands, the program verifies the input, 
-// orders the hands in ascending order, determines the winner, 
-// and displays the results. Finally, the user is prompted to
-// play again or quit program.
+// Date: 1-29-17
+// Description: Dealer is a singleton class that uses a single Dealer 
+// to either randomly generates players' hands, or it takes in user 
+// input of each players' hands. Dealer also ranks each Player's hand 
+// and determines the Poker Game's winning Player.
 // *****************************************************************
 using System;
 using System.Collections.Generic;
-using System.Linq;      // used for charArray.Contains()
+using System.Linq;
 
-public class Dealer
+public sealed class Dealer : PokerGame
 {
-    public static string PlayerName = "Hand ";
-    public static string DefaultName = "error";
+    private static Dealer instance;
+    public Dictionary<string, int> HandStrengths;
 
-    public static Deck CardDeck;
-    public static Dictionary<string, Player> Players;
-
-    public static int NumberOfPlayers = 2;
-    public static int NumberOfCardsPerHand = 5;
-
-    public static bool IsPlay = true;
-    public static bool IsManual = false;
-    public static string ErrorHand;
-
-    static void Main(string[] args)
+    /// <summary>
+    /// ensure the class only returns a single instance
+    /// </summary>
+    public static Dealer Instance
     {
-        char charInput;
-
-        Display.Display_Title();
-        Initialize_Game();
-
-        while (IsPlay)
+        get
         {
-            Display.Display_Start_Menu();
+            if (instance == null)
+                instance = new Dealer();
 
-            ConsoleKeyInfo decision = Console.ReadKey();
-            charInput = Validation.Validate_Input_Menu(decision, "Start");
-            Initialize_Players();
-            Validation.Validate_Input_Decision(charInput);
-
-            Console.WriteLine(Get_Game_Result());
+            return instance;
         }
     }
 
-    // initializes hands, deck, players, and populates the deck
-    public static void Initialize_Game()
+    /// <summary>
+    /// default constructor
+    /// </summary>
+    private Dealer()
     {
-        CardDeck = new Deck();
-        Players = new Dictionary<string, Player>();
+        Populate_Hand_Strengths();
     }
 
-    // initializes the players (aka the hands)
-    public static void Initialize_Players()
+    /// <summary>
+    /// initialize the player's hand strengths with 0
+    /// </summary>
+    public void Populate_Hand_Strengths()
     {
-        Players.Clear();
-
-        foreach (var player in Player.Populate_Players(NumberOfPlayers))
-            Players.Add(player.name, player);
+        HandStrengths = new Dictionary<string, int>()
+        {
+            {"High Card", 0},
+            {"One Pair", 1},
+            {"Two Pair", 2},
+            {"Three of a Kind", 3},
+            {"Straight", 4},
+            {"Flush", 5},
+            {"Full House", 6},
+            {"Four of a Kind", 7},
+            {"Straight Flush", 8},
+            {"Royal Flush", 9}
+        };
     }
 
-    // randomly generates cards for each hand
-    public static void Randomly_Generate_Cards()
+    /// <summary>
+    /// randomly generates cards for each hand
+    /// </summary>
+    public void Randomly_Generate_Cards()
     {
         Random rand = new Random();
         int count = 0;
@@ -84,7 +78,7 @@ public class Dealer
 
             cardNumber = rand.Next(0, 52 - count);
             // count modulus two will only work with two players
-            player.hand.Add(cardsToBeDealt[cardNumber]);
+            player.Hand.Add(cardsToBeDealt[cardNumber]);
             // remove card from cardsToBeDealt
             cardsToBeDealt.RemoveAt(cardNumber);
 
@@ -92,11 +86,13 @@ public class Dealer
         }
 
         Player.Order_Hands();
-        Display_Hands();
+        Display.Display_Hands();
     }
 
-    // prompt the user to enter the two hands
-    public static void Manually_Enter_Cards()
+    /// <summary>
+    /// prompt the user to enter the two hands
+    /// </summary>
+    public void Manually_Enter_Cards()
     {
         string hand;
         bool isHandValid;
@@ -120,28 +116,11 @@ public class Dealer
         //Display.Display_Hands();
     }
 
-    // display each player's hand
-    public static void Display_Hands()
+    /// <summary>
+    /// determine the rank of each player's hand
+    /// </summary>
+    public void Rank_Players_Hands()
     {
-        Console.Write(">Dealer ");
-        // iterate through each player
-        foreach (var player in Players)
-        {
-            List<Deck.Card> hand = player.Value.hand;
-
-            foreach (Deck.Card card in hand)
-                Console.Write(card.value.ToString() + card.suit.ToString());
-
-            Console.Write(" ");
-        }
-        Console.Write("\n");
-    }
-
-    // get the result of the game (assumes cards are already ordered)
-    public static string Get_Game_Result()
-    {
-        string result = "";
-
         // *** Types of Poker Hands (ranked in ascending order) *** 
         // 1) High Card (x1 high value, x4 random)
         // 2) One Pair (x2 same value, x3 random)
@@ -162,8 +141,8 @@ public class Dealer
         // iterate through each player
         foreach (var player in Players)
         {
-            List<Deck.Card> hand = player.Value.hand;
-            Dictionary<string, List<Deck.Card>> allHandStrengths = new Dictionary<string, List<Deck.Card>>(player.Value.allHandStrengths);
+            List<Deck.Card> hand = player.Value.Hand;
+            Dictionary<string, List<Deck.Card>> allHandStrengths = new Dictionary<string, List<Deck.Card>>(player.Value.AllHandStrengths);
             List<Deck.Card> cards = new List<Deck.Card>();
             List<Deck.Card> tempCard_List = new List<Deck.Card>();
             List<Deck.Card> tempOnePair_List = new List<Deck.Card>();
@@ -179,8 +158,8 @@ public class Dealer
             cards.Add(card0);
 
             allHandStrengths.TryGetValue("High Card", out tempCard_List);
-            player.Value.bestHandStrength["High Card"] = new List<Deck.Card>(cards);
-            player.Value.valueOfBestHand = Deck.HandStrengths["High Card"];
+            player.Value.BestHandStrength["High Card"] = new List<Deck.Card>(cards);
+            player.Value.ValueOfBestHand = HandStrengths["High Card"];
 
             tempCard_List.Clear();
             tempCard_List.Add(card0);
@@ -232,8 +211,8 @@ public class Dealer
                 foreach (var _card in cards)
                     tempCard_List.Add(_card);
 
-                player.Value.bestHandStrength["Full House"] = new List<Deck.Card>(cards);
-                player.Value.valueOfBestHand = Deck.HandStrengths["Full House"];
+                player.Value.BestHandStrength["Full House"] = new List<Deck.Card>(cards);
+                player.Value.ValueOfBestHand = HandStrengths["Full House"];
             }
             // 3x2 full house
             else if ((hand[i].value == hand[i + 1].value && hand[i + 1].value == hand[i + 2].value)
@@ -271,8 +250,8 @@ public class Dealer
                 foreach (var _card in cards)
                     tempCard_List.Add(_card);
 
-                player.Value.bestHandStrength["Full House"] = new List<Deck.Card>(cards);
-                player.Value.valueOfBestHand = Deck.HandStrengths["Full House"];
+                player.Value.BestHandStrength["Full House"] = new List<Deck.Card>(cards);
+                player.Value.ValueOfBestHand = HandStrengths["Full House"];
             }
 
             // *********************************************************************
@@ -301,33 +280,33 @@ public class Dealer
                 {
                     tempName = "Straight Flush";
                     allHandStrengths.TryGetValue("Straight Flush", out tempCard_List);
-                }
+                    }
 
-                tempCard_List.Clear();
-                cards.Clear();
+                    tempCard_List.Clear();
+                    cards.Clear();
 
-                card0.value = hand[i].value;
-                card0.suit = hand[i].suit;
-                card1.value = hand[i + 1].value;
-                card1.suit = hand[i + 1].suit;
-                card2.value = hand[i + 2].value;
-                card2.suit = hand[i + 2].suit;
-                card3.value = hand[i + 3].value;
-                card3.suit = hand[i + 3].suit;
-                card4.value = hand[i + 4].value;
-                card4.suit = hand[i + 4].suit;
-                cards.Add(card0);
-                cards.Add(card1);
-                cards.Add(card2);
-                cards.Add(card3);
-                cards.Add(card4);
+                    card0.value = hand[i].value;
+                    card0.suit = hand[i].suit;
+                    card1.value = hand[i + 1].value;
+                    card1.suit = hand[i + 1].suit;
+                    card2.value = hand[i + 2].value;
+                    card2.suit = hand[i + 2].suit;
+                    card3.value = hand[i + 3].value;
+                    card3.suit = hand[i + 3].suit;
+                    card4.value = hand[i + 4].value;
+                    card4.suit = hand[i + 4].suit;
+                    cards.Add(card0);
+                    cards.Add(card1);
+                    cards.Add(card2);
+                    cards.Add(card3);
+                    cards.Add(card4);
 
-                // update straight/straight flush list
-                foreach (var _card in cards)
-                    tempCard_List.Add(_card);
+                    // update straight/straight flush list
+                    foreach (var _card in cards)
+                        tempCard_List.Add(_card);
 
-                player.Value.bestHandStrength[tempName] = new List<Deck.Card>(cards);
-                player.Value.valueOfBestHand = Deck.HandStrengths[tempName];
+                    player.Value.BestHandStrength[tempName] = new List<Deck.Card>(cards);
+                    player.Value.ValueOfBestHand = HandStrengths[tempName];
             }
             // ***************************************
             // **************** Flush **************** 
@@ -364,11 +343,11 @@ public class Dealer
                 foreach (var _card in cards)
                     tempCard_List.Add(_card);
 
-                player.Value.bestHandStrength["Flush"] = new List<Deck.Card>(cards);
-                player.Value.valueOfBestHand = Deck.HandStrengths["Flush"];
+                player.Value.BestHandStrength["Flush"] = new List<Deck.Card>(cards);
+                player.Value.ValueOfBestHand = HandStrengths["Flush"];
             }
 
-            if (player.Value.valueOfBestHand < 8)   // less than straight flush or royal flush
+            if (player.Value.ValueOfBestHand< 8)   // less than straight flush or royal flush
             {
                 // ************************************************
                 // **************** Four of a Kind ****************
@@ -399,8 +378,8 @@ public class Dealer
                     foreach (var _card in cards)
                         tempCard_List.Add(_card);
 
-                    player.Value.bestHandStrength["Four of a Kind"] = new List<Deck.Card>(cards);
-                    player.Value.valueOfBestHand = Deck.HandStrengths["Four of a Kind"];
+                    player.Value.BestHandStrength["Four of a Kind"] = new List<Deck.Card>(cards);
+                    player.Value.ValueOfBestHand = HandStrengths["Four of a Kind"];
                 }
                 // four of a kind starting at index 1
                 else if (hand[i + 1].value == hand[i + 2].value
@@ -429,11 +408,11 @@ public class Dealer
                     foreach (var _card in cards)
                         tempCard_List.Add(_card);
 
-                    player.Value.bestHandStrength["Four of a Kind"] = new List<Deck.Card>(cards);
-                    player.Value.valueOfBestHand = Deck.HandStrengths["Four of a Kind"];
+                    player.Value.BestHandStrength["Four of a Kind"] = new List<Deck.Card>(cards);
+                    player.Value.ValueOfBestHand = HandStrengths["Four of a Kind"];
                 }
 
-                if (player.Value.valueOfBestHand < 4)   // less than flush
+                if (player.Value.ValueOfBestHand< 4)   // less than flush
                 {
                     // *************************************************
                     // **************** Three of a Kind ****************
@@ -459,8 +438,8 @@ public class Dealer
                         foreach (var _card in cards)
                             tempCard_List.Add(_card);
 
-                        player.Value.bestHandStrength["Three of a Kind"] = new List<Deck.Card>(cards);
-                        player.Value.valueOfBestHand = Deck.HandStrengths["Three of a Kind"];
+                        player.Value.BestHandStrength["Three of a Kind"] = new List<Deck.Card>(cards);
+                        player.Value.ValueOfBestHand = HandStrengths["Three of a Kind"];
                     }
                     // three of a kind starting at index 1
                     else if (hand[i + 1].value == hand[i + 2].value && hand[i + 2].value == hand[i + 3].value)
@@ -484,8 +463,8 @@ public class Dealer
                         foreach (var _card in cards)
                             tempCard_List.Add(_card);
 
-                        player.Value.bestHandStrength["Three of a Kind"] = new List<Deck.Card>(cards);
-                        player.Value.valueOfBestHand = Deck.HandStrengths["Three of a Kind"];
+                        player.Value.BestHandStrength["Three of a Kind"] = new List<Deck.Card>(cards);
+                        player.Value.ValueOfBestHand = HandStrengths["Three of a Kind"];
                     }
                     // three of a kind starting at index 2
                     else if (hand[i + 2].value == hand[i + 3].value && hand[i + 3].value == hand[i + 4].value)
@@ -509,13 +488,13 @@ public class Dealer
                         foreach (var _card in cards)
                             tempCard_List.Add(_card);
 
-                        player.Value.bestHandStrength["Three of a Kind"] = new List<Deck.Card>(cards);
-                        player.Value.valueOfBestHand = Deck.HandStrengths["Three of a Kind"];
+                        player.Value.BestHandStrength["Three of a Kind"] = new List<Deck.Card>(cards);
+                        player.Value.ValueOfBestHand = HandStrengths["Three of a Kind"];
                     }
 
-                    if (player.Value.valueOfBestHand < 3)   // less than three of a kind
+                    if (player.Value.ValueOfBestHand< 3)   // less than three of a kind
                     {
-                        for (i = 0; i < NumberOfCardsPerHand; ++i)
+                        for (i = 0; i<NumberOfCardsPerHand; ++i)
                         {
                             cards.Clear();
                             card0.value = hand[i].value;
@@ -545,8 +524,8 @@ public class Dealer
                                     // store previous one pair for possible two pair
                                     tempOnePair_List = new List<Deck.Card>(tempCard_List);
 
-                                    player.Value.bestHandStrength["One Pair"] = new List<Deck.Card>(cards);
-                                    player.Value.valueOfBestHand = Deck.HandStrengths["One Pair"];
+                                    player.Value.BestHandStrength["One Pair"] = new List<Deck.Card>(cards);
+                                    player.Value.ValueOfBestHand = HandStrengths["One Pair"];
 
                                     // ******************************************
                                     // **************** Two Pair ****************
@@ -583,8 +562,8 @@ public class Dealer
                                             foreach (var _card in tempOnePair_List)
                                                 tempCard_List.Add(_card);
 
-                                            player.Value.bestHandStrength["Two Pair"] = new List<Deck.Card>(cards);
-                                            player.Value.valueOfBestHand = Deck.HandStrengths["Two Pair"];
+                                            player.Value.BestHandStrength["Two Pair"] = new List<Deck.Card>(cards);
+                                            player.Value.ValueOfBestHand = HandStrengths["Two Pair"];
                                         }
                                         // two pair found
                                         if (i + 4 < NumberOfCardsPerHand)   // bounds check
@@ -618,8 +597,8 @@ public class Dealer
                                                 foreach (var _card in tempOnePair_List)
                                                     tempCard_List.Add(_card);
 
-                                                player.Value.bestHandStrength["Two Pair"] = new List<Deck.Card>(cards);
-                                                player.Value.valueOfBestHand = Deck.HandStrengths["Two Pair"];
+                                                player.Value.BestHandStrength["Two Pair"] = new List<Deck.Card>(cards);
+                                                player.Value.ValueOfBestHand = HandStrengths["Two Pair"];
                                             }
                                         }
                                     }
@@ -630,7 +609,14 @@ public class Dealer
                 }
             }
         }
+    }
 
+    /// <summary>
+    /// determine and get the winner's name
+    /// </summary>
+    /// <returns></returns>
+    public string Get_Winner()
+    {
         // ******************************************
         // ***********Determine Winner **************
         // ******************************************
@@ -638,8 +624,8 @@ public class Dealer
         List<Player> players = new List<Player>();
         List<Deck.Card> tempCard1 = new List<Deck.Card>();
         List<Deck.Card> tempCard2 = new List<Deck.Card>();
-        winningPlayer.name = DefaultName;
-        winningPlayer.valueOfBestHand = 0;
+        winningPlayer.Name = DefaultName;
+        winningPlayer.ValueOfBestHand = 0;
         string typeOfHand;
 
         foreach (var player in Players)
@@ -651,10 +637,10 @@ public class Dealer
             int playerNum = i + 1;
             players[i] = Players["Hand " + playerNum];
 
-            if (players[i].valueOfBestHand > winningPlayer.valueOfBestHand)
+            if (players[i].ValueOfBestHand > winningPlayer.ValueOfBestHand)
                 winningPlayer = new Player(players[i]);
 
-            typeOfHand = Deck.HandStrengths.FirstOrDefault(x => x.Value == players[0].valueOfBestHand).Key;
+            typeOfHand = HandStrengths.FirstOrDefault(x => x.Value == players[0].ValueOfBestHand).Key;
 
             // ***** Full House uses higher of x3 same value to resolve tie)
             if (typeOfHand == "Full House")
@@ -662,11 +648,11 @@ public class Dealer
                 // retrieve values for highest three of a kind
                 int sizeOfHand = 0;
 
-                tempCard1 = players[0].bestHandStrength[typeOfHand];
-                tempCard2 = players[1].bestHandStrength[typeOfHand];
+                tempCard1 = players[0].BestHandStrength[typeOfHand];
+                tempCard2 = players[1].BestHandStrength[typeOfHand];
 
-                tempCard1 = players[0].allHandStrengths["Three of a Kind"];
-                tempCard2 = players[1].allHandStrengths["Three of a Kind"];
+                tempCard1 = players[0].AllHandStrengths["Three of a Kind"];
+                tempCard2 = players[1].AllHandStrengths["Three of a Kind"];
 
                 // compare highest three of a kind values and determine winner
                 sizeOfHand = tempCard1.Count - 1;
@@ -680,19 +666,19 @@ public class Dealer
         }
 
         // resolve tie based on higher value card
-        if (winningPlayer.name == DefaultName)
+        if (winningPlayer.Name == DefaultName)
         {
             // same type of hand: need to verify highest value card
-            if (players[0].valueOfBestHand == players[1].valueOfBestHand)
+            if (players[0].ValueOfBestHand == players[1].ValueOfBestHand)
             {
                 // return the type of best hand each player had
-                typeOfHand = Deck.HandStrengths.FirstOrDefault(x => x.Value == players[0].valueOfBestHand).Key;
+                typeOfHand = HandStrengths.FirstOrDefault(x => x.Value == players[0].ValueOfBestHand).Key;
                 tempCard1 = new List<Deck.Card>();
                 tempCard2 = new List<Deck.Card>();
                 int sizeOfHand = 0;
 
-                tempCard1 = players[0].bestHandStrength[typeOfHand];
-                tempCard2 = players[1].bestHandStrength[typeOfHand];
+                tempCard1 = players[0].BestHandStrength[typeOfHand];
+                tempCard2 = players[1].BestHandStrength[typeOfHand];
 
                 sizeOfHand = tempCard1.Count - 1;
 
@@ -704,8 +690,6 @@ public class Dealer
             }
         }
 
-        result = winningPlayer.name + " wins";
-
-        return result;
+        return winningPlayer.Name + " wins";
     }
 }

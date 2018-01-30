@@ -1,6 +1,13 @@
-﻿using System;
+﻿// *****************************************************************
+// Title: Display.cs
+// Author: John Fitzgerald
+// Date: 1-29-17
+// Description: Display handles most of the console output.
+// *****************************************************************
+using System;
+using System.Collections.Generic;
 
-public class Display : Dealer
+public class Display : PokerGame
 {
     // display title
     public static void Display_Title()
@@ -44,5 +51,28 @@ public class Display : Dealer
     public static void Display_Invalid_Character(char charInput)
     {
         Console.WriteLine("Invalid character detected: {0}", charInput);
+    }
+
+    // display each player's hand
+    public static void Display_Hands()
+    {
+        Console.Write(">Dealer ");
+        // iterate through each player
+        foreach (var player in Players)
+        {
+            List<Deck.Card> hand = player.Value.Hand;
+
+            foreach (Deck.Card card in hand)
+                Console.Write(card.value.ToString() + card.suit.ToString());
+
+            Console.Write(" ");
+        }
+        Console.Write("\n");
+    }
+
+    // display the game results
+    public static void Display_Game_Results(string result)
+    {
+        Console.WriteLine(result);
     }
 }

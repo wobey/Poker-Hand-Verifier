@@ -1,19 +1,31 @@
-﻿using System.Collections.Generic;
+﻿// *****************************************************************
+// Title: Deck.cs
+// Author: John Fitzgerald
+// Date: 1-29-17
+// Description: The Deck is the Poker Game's only deck between
+// all Players. It contains a standard 52-card deck (along with 
+// values and suits) and the hand strengths for the Poker Game.
+// *****************************************************************
+using System.Collections.Generic;
 
-public class Deck : Dealer
+public class Deck : PokerGame
 {
-    public static Dictionary<char, int> Values;
+    public static Dictionary<char, int> Values, Suits;
     public static List<char> Values_List;
-    public static Dictionary<char, int> Suits;
-    public static Dictionary<string, int> HandStrengths;
     public List<Card> FullDeck;
 
+    /// <summary>
+    /// default constructor
+    /// </summary>
     public Deck()
     {
         FullDeck = new List<Card>();
         Populate_Deck();
     }
 
+    /// <summary>
+    /// a single card in the deck
+    /// </summary>
     public struct Card
     {
         public char value, suit;
@@ -25,13 +37,14 @@ public class Deck : Dealer
         }
     }
 
-    // populate a deck of 52 cards (based on content of Values and Suits)
+    /// <summary>
+    /// populate a deck of 52 cards (based on content of Values and Suits)
+    /// </summary>
     public void Populate_Deck()
     {
         Populate_Values();
         Populate_Values_List();
         Populate_Suits();
-        Populate_Hand_Strengths();
 
         foreach (var _value in Values)
         {
@@ -46,7 +59,9 @@ public class Deck : Dealer
         }
     }
 
-    // populate the card values (Dictionary)
+    /// <summary>
+    /// populate the card values
+    /// </summary>
     public void Populate_Values()
     {
         Values = new Dictionary<char, int>()
@@ -67,7 +82,9 @@ public class Deck : Dealer
         };
     }
 
-    // populate the card values (List)
+    /// <summary>
+    /// populate the card values (List)
+    /// </summary>
     public void Populate_Values_List()
     {
         Values_List = new List<char>();
@@ -76,7 +93,9 @@ public class Deck : Dealer
             Values_List.Add(val.Key);
     }
 
-    // populate the card suits
+    /// <summary>
+    /// populate the card suits
+    /// </summary>
     public static void Populate_Suits()
     {
         Suits = new Dictionary<char, int>()
@@ -86,51 +105,5 @@ public class Deck : Dealer
             {'H', 2},
             {'D', 3}
         };
-    }
-
-    // initialize the player's hand strengths with 0
-    public void Populate_Hand_Strengths()
-    {
-        HandStrengths = new Dictionary<string, int>()
-        {
-            {"High Card", 0},
-            {"One Pair", 1},
-            {"Two Pair", 2},
-            {"Three of a Kind", 3},
-            {"Straight", 4},
-            {"Flush", 5},
-            {"Full House", 6},
-            {"Four of a Kind", 7},
-            {"Straight Flush", 8},
-            {"Royal Flush", 9}
-        };
-    }
-
-    // TODO decouple dependancy: how to make this unreliant on Player and exist in Deck?
-    // populate the card hand strengths
-    public static Player Populate_AllHand_Strengths(Player player)
-    {
-        player.allHandStrengths = new Dictionary<string, List<Card>>()
-        {
-            {"High Card", new List<Card>()},
-            {"One Pair", new List<Card>()},
-            {"Two Pair", new List<Card>()},
-            {"Three of a Kind", new List<Card>()},
-            {"Straight", new List<Card>()},
-            {"Flush", new List<Card>()},
-            {"Full House", new List<Card>()},
-            {"Four of a Kind", new List<Card>()},
-            {"Straight Flush", new List<Card>()},
-            {"Royal Flush", new List<Card>()}
-        };
-
-        // intiialzie with a 0 value card
-        foreach (var handType in player.allHandStrengths)
-        {
-            Card card = new Card('0', '0');
-            handType.Value.Add(card);
-        }
-
-        return player;
     }
 }
