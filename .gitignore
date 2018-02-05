@@ -280,3 +280,5 @@ __pycache__/
 # Other Visual Studio files and folders
 Properties/
 App.config
+Poker.sln
+Poker.csproj
